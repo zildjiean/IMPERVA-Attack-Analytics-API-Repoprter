@@ -1,6 +1,6 @@
 # Attack Analytics Daily/Range Report (Imperva Cloud WAF)
 
-รายงาน HTML สำหรับ **Imperva Cloud WAF – Attack Analytics** ที่สร้างจาก **API response เท่านั้น** (ไม่เดาข้อมูล) เพื่อสรุปภาพรวมเหตุการณ์และการโจมตีรายวัน/ช่วงเวลา ในรูปแบบที่นำไปนำเสนอผู้บริหารได้ทันที
+รายงาน HTML สำหรับ **Imperva Cloud WAF – Attack Analytics** ที่สร้างจาก **API response เท่านั้น** เพื่อสรุปภาพรวมเหตุการณ์และการโจมตีรายวัน/ช่วงเวลา ในรูปแบบที่นำไปนำเสนอผู้บริหารได้ทันที
 
 > สคริปต์หลัก: `aa_report.py`
 > ผลลัพธ์: ไฟล์ HTML เดียว เปิดได้ในเบราว์เซอร์ (มีโหมด Light/Dark, ปรับขนาดฟอนต์, ตารางค้นหา/เรียง/ดาวน์โหลด CSV/JSON, กราฟ Chart.js)
