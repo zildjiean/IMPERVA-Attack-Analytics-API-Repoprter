@@ -1003,6 +1003,81 @@ window.__hostPies=[]; window.hostDatasets={host_datasets_js};
 
 
 # ---------------- Main ----------------
+def generate_report(api_id, api_key, caid, date_str, end_date_str=None, tz="Asia/Bangkok", 
+                   granularity="hour", severity_filter=None, breakdown_limit=10, 
+                   breakdown_hosts=None, mask_ips=False, mask_cidr=None, timeout=30, 
+                   concurrency=8, https_proxy=None, max_retries=2, retry_backoff=0.5, 
+                   theme="dark", ca_bundle=None, use_certifi=False, insecure=False):
+    """
+    Generate Attack Analytics HTML report
+    Returns: (html_content, output_filename, error_message)
+    """
+    try:
+        sdt = parse_date_yyyymmdd(date_str)
+        edt = parse_date_yyyymmdd(end_date_str) if end_date_str else sdt
+    except Exception as e:
+        return None, None, f"Invalid date format: {e}"
+    
+    if edt < sdt:
+        sdt, edt = edt, sdt
+
+    ctx = build_ssl_context(ca_bundle, use_certifi, insecure)
+    opener = build_opener(https_proxy, ctx)
+    headers = default_headers(api_id, api_key)
+    from_ms, to_ms, tz_name = range_bounds(sdt, edt, tz)
+
+    try:
+        inc_all = fetch_incidents(headers, caid, from_ms, to_ms, ctx, opener, timeout, max_retries, retry_backoff)
+    except Exception as e:
+        return None, None, f"Error fetching incidents: {e}"
+
+    if severity_filter:
+        allow = {s.strip().upper() for s in severity_filter.split(",") if s.strip()}
+        incidents = [x for x in inc_all if x.severity in allow]
+    else:
+        incidents = inc_all
+
+    stats_map: Dict[str, IncidentStats] = {}
+    fail = 0
+    if incidents:
+        with cf.ThreadPoolExecutor(max_workers=max(1, concurrency)) as ex:
+            futs = {ex.submit(fetch_incident_stats, headers, caid, inc.id, ctx, opener,
+                              timeout, max_retries, retry_backoff): inc.id for inc in incidents}
+            for fut in cf.as_completed(futs):
+                inc_id = futs[fut]
+                try:
+                    stats_map[inc_id] = fut.result()
+                except Exception as e:
+                    fail += 1
+                    sys.stderr.write(f"WARNING: stats failed for incident {inc_id}: {e}\n")
+
+    limit = max(1, min(breakdown_limit, 25))
+    agg = aggregate(incidents, stats_map, top_n=limit, mask_ips=mask_ips, mask_cidr=mask_cidr or 24)
+
+    if breakdown_hosts:
+        sel = [h.strip() for h in breakdown_hosts.split(",") if h.strip()]
+        sel = [h for h in sel if h != "Other"]
+    else:
+        sel = [label for (label, _v) in agg["host_top"] if label != "Other"]
+
+    host_bds = per_host_breakdowns(incidents, stats_map, sel, top_n=limit,
+                                   mask_ips=mask_ips, mask_cidr=mask_cidr or 24)
+
+    labels, series, earliest, latest = build_stacks(incidents, stats_map, from_ms, to_ms, tz, granularity)
+
+    out_html = render_html(
+        date_str=sdt.strftime("%Y-%m-%d"), end_date_str=edt.strftime("%Y-%m-%d"),
+        tz=tz, bounds=(from_ms, to_ms, tz_name),
+        incidents=incidents, agg=agg, host_bds=host_bds,
+        hourly_labels=labels, hourly_series=series,
+        earliest=earliest, latest=latest, initial_theme=theme,
+        granularity=granularity, partial_fail_count=fail
+    )
+
+    out_filename = f"attack_analytics_caid{caid}_{sdt.strftime('%Y%m%d')}_{edt.strftime('%Y%m%d')}.html"
+    return out_html, out_filename, None
+
+
 def main():
     p = argparse.ArgumentParser(description="Generate Imperva Attack Analytics HTML report (API-only data).",
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)

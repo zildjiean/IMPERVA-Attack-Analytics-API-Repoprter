@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานที่สร้างแล้ว - Imperva Attack Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .nav-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            margin: 0 0.5rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links .btn-primary {
+            background: var(--primary);
+        }
+
+        .nav-links .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-links .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .nav-links .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .reports-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .report-item {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .report-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .report-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .report-date {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .report-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-processing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .report-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-size: 0.875rem;
+            color: var(--text);
+            margin-top: 0.25rem;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .report-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .report-actions {
+                justify-content: center;
+            }
+
+            .nav-links a {
+                margin: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-bar"></i> รายงานที่สร้างแล้ว</h1>
+            <p>จัดการและดูรายงาน Attack Analytics ทั้งหมด</p>
+        </div>
+
+        <div class="nav-links">
+            <a href="/" class="btn-primary"><i class="fas fa-plus"></i> สร้างรายงานใหม่</a>
+            <a href="javascript:void(0)" onclick="refreshReports()" class="btn-secondary"><i class="fas fa-sync-alt"></i> รีเฟรช</a>
+        </div>
+
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="totalReports">0</div>
+                <div class="stat-label">รายงานทั้งหมด</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedReports">0</div>
+                <div class="stat-label">สำเร็จแล้ว</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="processingReports">0</div>
+                <div class="stat-label">กำลังประมวลผล</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="errorReports">0</div>
+                <div class="stat-label">ข้อผิดพลาด</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="reports-grid" id="reportsContainer">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>กำลังโหลด...</h3>
+                    <p>กรุณารอสักครู่</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadReports() {
+            try {
+                const response = await fetch('/api/reports');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'ไม่สามารถโหลดรายงานได้');
+                }
+                
+                displayReports(data.reports);
+                updateStats(data.reports);
+                
+            } catch (error) {
+                document.getElementById('reportsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>เกิดข้อผิดพลาด</h3>
+                        <p>${error.message}</p>
+                        <button onclick="loadReports()" class="btn btn-primary">
+                            <i class="fas fa-retry"></i> ลองใหม่
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayReports(reports) {
+            const container = document.getElementById('reportsContainer');
+            
+            if (reports.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>ยังไม่มีรายงาน</h3>
+                        <p>เริ่มต้นสร้างรายงาน Attack Analytics แรกของคุณ</p>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> สร้างรายงานใหม่
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = reports.map(report => {
+                const statusClass = {
+                    'completed': 'status-completed',
+                    'processing': 'status-processing',
+                    'error': 'status-error'
+                }[report.status] || 'status-processing';
+                
+                const statusText = {
+                    'completed': 'สำเร็จ',
+                    'processing': 'กำลังประมวลผล',
+                    'error': 'ข้อผิดพลาด'
+                }[report.status] || 'ไม่ทราบสถานะ';
+                
+                return `
+                    <div class="report-item">
+                        <div class="report-header">
+                            <div>
+                                <div class="report-title">${report.filename || report.task_id}</div>
+                                <div class="report-date">${new Date(report.created_at).toLocaleString('th-TH')}</div>
+                            </div>
+                            <div class="report-status ${statusClass}">${statusText}</div>
+                        </div>
+                        
+                        <div class="report-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Customer Account ID</div>
+                                <div class="detail-value">${report.caid || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">วันที่รายงาน</div>
+                                <div class="detail-value">${report.date || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">เขตเวลา</div>
+                                <div class="detail-value">${report.timezone || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">ธีม</div>
+                                <div class="detail-value">${report.theme || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-actions">
+                            ${report.status === 'completed' ? `
+                                <a href="/view/${report.task_id}" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> ดูรายงาน
+                                </a>
+                                <a href="/download/${report.task_id}" class="btn btn-success">
+                                    <i class="fas fa-download"></i> ดาวน์โหลด
+                                </a>
+                            ` : report.status === 'processing' ? `
+                                <button onclick="checkStatus('${report.task_id}')" class="btn btn-secondary">
+                                    <i class="fas fa-sync-alt"></i> ตรวจสอบสถานะ
+                                </button>
+                            ` : `
+                                <button onclick="showError('${report.task_id}')" class="btn btn-secondary">
+                                    <i class="fas fa-info-circle"></i> ดูข้อผิดพลาด
+                                </button>
+                            `}
+                            <button onclick="deleteReport('${report.task_id}')" class="btn" style="background-color: #dc3545; color: white; margin-left: 8px;">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateStats(reports) {
+            const total = reports.length;
+            const completed = reports.filter(r => r.status === 'completed').length;
+            const processing = reports.filter(r => r.status === 'processing').length;
+            const error = reports.filter(r => r.status === 'error').length;
+            
+            document.getElementById('totalReports').textContent = total;
+            document.getElementById('completedReports').textContent = completed;
+            document.getElementById('processingReports').textContent = processing;
+            document.getElementById('errorReports').textContent = error;
+        }
+        
+        async function checkStatus(taskId) {
+            try {
+                const response = await fetch(`/status/${taskId}`);
+                const status = await response.json();
+                
+                if (response.ok) {
+                    alert(`สถานะ: ${status.message}\nความคืบหน้า: ${status.progress}%`);
+                    
+                    if (status.status === 'completed' || status.status === 'error') {
+                        loadReports(); // Refresh the list
+                    }
+                } else {
+                    alert('ไม่สามารถตรวจสอบสถานะได้: ' + (status.error || 'ข้อผิดพลาดไม่ทราบสาเหตุ'));
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+            }
+        }
+        
+        async function showError(taskId) {
+            try {
+                const response = await fetch(`/status/${taskId}`);
+                const status = await response.json();
+                
+                if (response.ok) {
+                    alert('ข้อผิดพลาด: ' + (status.message || 'ไม่ทราบสาเหตุ'));
+                } else {
+                    alert('ไม่สามารถดูข้อผิดพลาดได้');
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+            }
+        }
+        
+        async function deleteReport(taskId) {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบรายงานนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/delete/${taskId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('ลบรายงานเรียบร้อยแล้ว');
+                    loadReports(); // Refresh the list
+                } else {
+                    alert('ไม่สามารถลบรายงานได้: ' + (result.error || 'ข้อผิดพลาดไม่ทราบสาเหตุ'));
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+            }
+        }
+        
+        function refreshReports() {
+            document.getElementById('reportsContainer').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>กำลังโหลด...</h3>
+                    <p>กรุณารอสักครู่</p>
+                </div>
+            `;
+            loadReports();
+        }
+        
+        // Load reports on page load
+        document.addEventListener('DOMContentLoaded', loadReports);
+        
+        // Auto-refresh every 30 seconds for processing reports
+        setInterval(() => {
+            const processingCount = parseInt(document.getElementById('processingReports').textContent);
+            if (processingCount > 0) {
+                loadReports();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

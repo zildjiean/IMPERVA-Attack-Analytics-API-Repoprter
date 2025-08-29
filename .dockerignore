@@ -1,0 +1,38 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Reports (will be mounted as volume)
+reports/*.html
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Documentation
+*.md
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose.yml
+.dockerignore
